@@ -23,6 +23,7 @@ export class TodoComponent implements OnInit {
   selectedList: TodoListDto;
   selectedItem: TodoItemDto;
   tagFilter: string = '';
+  textFilter: string = '';
   newListEditor: any = {};
   listOptionsEditor: any = {};
   newListModalRef: BsModalRef;
@@ -278,11 +279,15 @@ export class TodoComponent implements OnInit {
   }
 
   filteredItems() {
-    if (!this.selectedList) return [];
-    if (!this.tagFilter) return this.selectedList.items;
-    return this.selectedList.items.filter(item =>
-      item.tags && item.tags.some(tag => tag.toLowerCase().includes(this.tagFilter.toLowerCase()))
-    );
+    let items = this.selectedList?.items || [];
+    if (this.tagFilter) {
+      items = items.filter(item => item.tags && item.tags.includes(this.tagFilter));
+    }
+    if (this.textFilter) {
+      const filter = this.textFilter.toLowerCase();
+      items = items.filter(item => item.title && item.title.toLowerCase().includes(filter));
+    }
+    return items;
   }
 
   getAllTags(): string[] {
