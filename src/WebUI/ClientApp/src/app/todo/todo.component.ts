@@ -5,7 +5,8 @@ import {
   TodoListsClient, TodoItemsClient,
   TodoListDto, TodoItemDto, PriorityLevelDto,
   CreateTodoListCommand, UpdateTodoListCommand,
-  CreateTodoItemCommand, UpdateTodoItemDetailCommand
+  CreateTodoItemCommand, UpdateTodoItemDetailCommand,
+  UpdateTodoItemCommand
 } from '../web-api-client';
 
 @Component({
@@ -46,7 +47,12 @@ export class TodoComponent implements OnInit {
   ngOnInit(): void {
     this.listsClient.get().subscribe(
       result => {
-        this.lists = result.lists;
+        this.lists = result.lists
+          .filter(t => !t.isDeleted)
+          .map(list => {
+            list.items = list.items.filter(i => !i.isDeleted);
+            return list;
+          });
         this.priorityLevels = result.priorityLevels;
         if (this.lists.length) {
           this.selectedList = this.lists[0];
@@ -125,7 +131,12 @@ export class TodoComponent implements OnInit {
   }
 
   deleteListConfirmed(): void {
-    this.listsClient.delete(this.selectedList.id).subscribe(
+    const updateCmd = new UpdateTodoListCommand();
+    Object.assign(updateCmd, {
+      ...this.selectedList,
+      isDeleted: true
+    });
+    this.listsClient.update(this.selectedList.id, updateCmd).subscribe(
       () => {
         this.deleteListModalRef.hide();
         this.lists = this.lists.filter(t => t.id !== this.selectedList.id);
@@ -246,11 +257,17 @@ export class TodoComponent implements OnInit {
       const itemIndex = this.selectedList.items.indexOf(this.selectedItem);
       this.selectedList.items.splice(itemIndex, 1);
     } else {
-      this.itemsClient.delete(item.id).subscribe(
-        () =>
-        (this.selectedList.items = this.selectedList.items.filter(
-          t => t.id !== item.id
-        )),
+      const updateCmd = new UpdateTodoItemCommand();
+      Object.assign(updateCmd, {
+        ...item,
+        isDeleted: true
+      });
+      this.itemsClient.update(item.id, updateCmd).subscribe(
+        () => {
+          this.selectedList.items = this.selectedList.items.filter(
+            t => t.id !== item.id
+          );
+        },
         error => console.error(error)
       );
     }

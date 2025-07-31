@@ -69,6 +69,10 @@ namespace Todo_App.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ListId");
 
+                    b.Property<bool>("IsDeleted")
+                        .IsRequired()
+                        .HasColumnType("bit");
+
                     b.ToTable("TodoItems");
                 });
 
@@ -98,6 +102,10 @@ namespace Todo_App.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
+
+                    b.Property<bool>("IsDeleted")
+                        .IsRequired()
+                        .HasColumnType("bit");
 
                     b.ToTable("TodoLists");
                 });
