@@ -30,6 +30,18 @@
       </ul>
     </div>
     <div class="col-sm-8" *ngIf="selectedList">
+      <div class="mb-2">
+        <input type="text" class="form-control d-inline-block w-auto" style="width: 200px;"
+          placeholder="Filter by tag..." [(ngModel)]="tagFilter" />
+        <span *ngIf="tagFilter" class="badge bg-secondary ms-2">
+          {{ tagFilter }}
+          <button type="button" class="btn-close btn-close-white btn-sm ms-1" aria-label="Clear"
+            (click)="tagFilter = ''"></button>
+        </span>
+        <!-- Optional: Show all tags as clickable suggestions -->
+        <span *ngFor="let tag of getAllTags()" class="badge bg-light text-dark ms-1" style="cursor:pointer"
+          (click)="tagFilter = tag">{{ tag }}</span>
+      </div>
       <div class="clearfix">
         <h2 class="float-start">{{ selectedList.title }}</h2>
         <button id="listOptions" class="btn btn-default float-end" title="List Options..."
@@ -38,7 +50,7 @@
         </button>
       </div>
       <ul id="todo-items" class="list-group mb-2">
-        <li class="list-group-item" *ngFor="let item of selectedList.items; index as i">
+        <li class="list-group-item" *ngFor="let item of filteredItems(); index as i">
           <div class="d-flex">
             <div class="todo-item-checkbox">
               <input type="checkbox" [(ngModel)]="item.done" (change)="updateItem(item)" />
@@ -50,6 +62,17 @@
               <div class="todo-item-title" *ngIf="item != selectedItem" [ngClass]="{ 'done-todo': item.done }"
                 (click)="editItem(item, 'itemTitle' + i)" class="form-control item-input-control">
                 <span>{{ item.title }}</span>
+              </div>
+              <!-- Tags display and management -->
+              <div class="mt-2">
+                <span *ngFor="let tag of item.tags; let ti = index" class="badge bg-info text-dark me-1">
+                  {{ tag }}
+                  <button type="button" class="btn-close btn-close-white btn-sm ms-1" aria-label="Remove"
+                    (click)="removeTag(item, ti)"></button>
+                </span>
+                <input type="text" class="form-control d-inline-block w-auto" style="width: 100px;"
+                  placeholder="Add tag" [(ngModel)]="item.newTag" (keyup.enter)="addTag(item)" />
+                <button class="btn btn-sm btn-secondary ms-1" (click)="addTag(item)">+</button>
               </div>
             </div>
             <div class="todo-item-commands">

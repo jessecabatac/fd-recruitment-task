@@ -22,6 +22,7 @@ export class TodoComponent implements OnInit {
   priorityLevels: PriorityLevelDto[];
   selectedList: TodoListDto;
   selectedItem: TodoItemDto;
+  tagFilter: string = '';
   newListEditor: any = {};
   listOptionsEditor: any = {};
   newListModalRef: BsModalRef;
@@ -260,5 +261,34 @@ export class TodoComponent implements OnInit {
     clearInterval(this.deleteCountDownInterval);
     this.deleteCountDown = 0;
     this.deleting = false;
+  }
+
+  addTag(item: any) {
+    if (!item.tags) item.tags = [];
+    if (item.newTag && !item.tags.includes(item.newTag.trim())) {
+      item.tags.push(item.newTag.trim());
+      item.newTag = '';
+      this.updateItem(item);
+    }
+  }
+
+  removeTag(item: any, tagIndex: number) {
+    item.tags.splice(tagIndex, 1);
+    this.updateItem(item);
+  }
+
+  filteredItems() {
+    if (!this.selectedList) return [];
+    if (!this.tagFilter) return this.selectedList.items;
+    return this.selectedList.items.filter(item =>
+      item.tags && item.tags.some(tag => tag.toLowerCase().includes(this.tagFilter.toLowerCase()))
+    );
+  }
+
+  getAllTags(): string[] {
+    if (!this.selectedList) return [];
+    const tags = this.selectedList.items.reduce((acc, item) => acc.concat(item.tags || []), []);
+    // Remove duplicates
+    return Array.from(new Set(tags));
   }
 }
